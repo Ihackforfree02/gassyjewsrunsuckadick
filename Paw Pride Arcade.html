@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Paw Pride Arcade</title>
+<style>
+:root{--bg:#fbf8ff;--card:#fff;--text:#1d1530;--muted:#6a6080;--line:#e6dff5;--accent:#7b3fe4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#140f20;--card:#201832;--text:#f4efff;--muted:#a99cc4;--line:#352a4f;--accent:#b78cff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#140f20;--card:#201832;--text:#f4efff;--muted:#a99cc4;--line:#352a4f;--accent:#b78cff;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+.bar{height:8px;background:linear-gradient(90deg,#d52d00,#ef7627,#ff9a56,#fff,#d362a4,#b55690,#a30262)}
+header,main,footer{max-width:860px;margin:0 auto;padding:20px}
+h1{font-size:clamp(2rem,6vw,3.2rem);margin:.2em 0;background:linear-gradient(90deg,#d52d00,#ef7627,#d362a4,#a30262);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);margin:0 0 8px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+button{font:inherit;cursor:pointer}
+.tab{padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel.on{display:block}
+.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.btn{padding:8px 16px;border-radius:10px;border:0;background:var(--accent);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:460px;margin:0 auto}
+.c{aspect-ratio:1;border-radius:12px;border:2px solid var(--line);background:repeating-linear-gradient(45deg,var(--line),var(--line) 8px,var(--card) 8px,var(--card) 16px);cursor:pointer;padding:0}
+.c.show{border-color:var(--accent)}
+.c.done{opacity:.55}
+.c:not(.show)::after{content:"🐾";font-size:1.6rem}
+.name{text-align:center;min-height:1.6em;margin-top:12px;font-weight:600}
+.ttt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto}
+.t{aspect-ratio:1;font-size:2.4rem;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--text)}
+.msg{text-align:center;margin-top:12px;font-weight:600;min-height:1.5em}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.tile{height:60px;border-radius:10px;display:flex;align-items:flex-end;padding:6px 8px;color:#fff;font-size:.8rem;text-shadow:0 1px 3px #000a}
+footer{color:var(--muted);text-align:center;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<header>
+  <h1>Paw Pride Arcade 🐾</h1>
+  <p class="sub">Free little games for lesbians, furries, and everyone in between. Fluffy tails and high scores welcome.</p>
+  <div class="tabs">
+    <button class="tab on" data-p="mem">Flag Match</button>
+    <button class="tab" data-p="ttt">Paws vs Foxes</button>
+    <button class="tab" data-p="about">Flag Guide</button>
+  </div>
+</header>
+<main>
+  <section class="panel on" id="mem">
+    <div class="row"><strong>Match the pride flags</strong><span>Moves: <b id="mv">0</b></span><button class="btn" id="mr">New game</button></div>
+    <div class="grid" id="mg"></div>
+    <div class="name" id="mn"></div>
+  </section>
+
+  <section class="panel" id="ttt">
+    <div class="row"><strong>You 🐾 vs Computer 🦊</strong><span>Wins: <b id="w">0</b> · Losses: <b id="l">0</b></span><button class="btn" id="tr">New game</button></div>
+    <div class="ttt" id="tg"></div>
+    <div class="msg" id="tm"></div>
+  </section>
+
+  <section class="panel" id="about">
+    <strong>Flags in this game</strong>
+    <p class="sub">Each flag stands for a different part of the community.</p>
+    <div class="tiles" id="tiles"></div>
+  </section>
+</main>
+<footer>Made with love, tails wagging. Everyone’s welcome here. 🐾🏳️‍🌈</footer>
+
+<script>
+var F=[
+["Rainbow","#e40303,#ff8c00,#ffed00,#008026,#004dff,#750787"],
+["Transgender","#5bcefa,#f5a9b8,#fff,#f5a9b8,#5bcefa"],
+["Bisexual","#d60270,#d60270,#9b4f96,#0038a8,#0038a8"],
+["Pansexual","#ff218c,#ffd800,#21b1ff"],
+["Lesbian","#d52d00,#ef7627,#ff9a56,#fff,#d362a4,#b55690,#a30262"],
+["Asexual","#000,#a3a3a3,#fff,#800080"],
+["Non-binary","#fcf434,#fff,#9c59d1,#2c2c2c"],
+["Genderfluid","#ff75a2,#fff,#be18d6,#000,#333ebd"]
+];
+function grad(c){var a=c.split(","),n=a.length,s=[];a.forEach(function(x,i){s.push(x+" "+(i*100/n)+"% "+((i+1)*100/n)+"%")});return "linear-gradient(180deg,"+s.join(",")+")"}
+var $=function(i){return document.getElementById(i)};
+document.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.toggle("on",x===b)});
+  document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("on",p.id===b.dataset.p)});
+}});
+$("tiles").innerHTML=F.map(function(f){return '<div class="tile" style="background:'+grad(f[1])+'">'+f[0]+'</div>'}).join("");
+
+/* Memory */
+var open=[],moves=0,lock=false,found=0;
+function newMem(){
+  var d=F.concat(F).map(function(f,i){return {f:f,k:Math.random()}}).sort(function(a,b){return a.k-b.k});
+  open=[];moves=0;found=0;lock=false;$("mv").textContent=0;$("mn").textContent="";
+  var g=$("mg");g.innerHTML="";
+  d.forEach(function(o){
+    var b=document.createElement("button");b.className="c";b.setAttribute("aria-label","Hidden card");
+    b.onclick=function(){
+      if(lock||b.classList.contains("show")||b.classList.contains("done"))return;
+      b.classList.add("show");b.style.background=grad(o.f[1]);open.push({b:b,o:o});
+      if(open.length==2){
+        moves++;$("mv").textContent=moves;
+        var a=open[0],c=open[1];
+        if(a.o.f[0]==c.o.f[0]){a.b.classList.add("done");c.b.classList.add("done");$("mn").textContent=a.o.f[0]+" flag found!";open=[];found++;
+          if(found==F.length)$("mn").textContent="You did it in "+moves+" moves! 🌈";}
+        else{lock=true;setTimeout(function(){[a,c].forEach(function(x){x.b.classList.remove("show");x.b.style.background=""});open=[];lock=false;$("mn").textContent=""},800)}
+      }
+    };
+    g.appendChild(b);
+  });
+}
+$("mr").onclick=newMem;newMem();
+
+/* Tic-tac-toe */
+var bd,over,W=0,L=0,LN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function win(p){return LN.some(function(l){return l.every(function(i){return bd[i]==p})})}
+function draw(){var t=$("tg").children;for(var i=0;i<9;i++)t[i].textContent=bd[i]=="h"?"🐾":bd[i]=="s"?"🦊":"";$("w").textContent=W;$("l").textContent=L}
+function find(p){for(var j=0;j<LN.length;j++){var l=LN[j],v=l.filter(function(i){return bd[i]==p}).length,e=l.filter(function(i){return !bd[i]});if(v==2&&e.length==1)return e[0]}return -1}
+function cpu(){
+  var m=find("s");if(m<0)m=find("h");
+  if(m<0&&!bd[4])m=4;
+  if(m<0){var e=[];bd.forEach(function(v,i){if(!v)e.push(i)});m=e[Math.floor(Math.random()*e.length)]}
+  bd[m]="s";
+  if(win("s")){over=true;L++;$("tm").textContent="The computer wins this one. Rematch?"}
+  else if(bd.every(Boolean)){over=true;$("tm").textContent="It’s a draw!"}
+  draw();
+}
+function newT(){
+  bd=Array(9).fill(null);over=false;$("tm").textContent="Your turn!";
+  var g=$("tg");g.innerHTML="";
+  for(var i=0;i<9;i++){(function(i){var b=document.createElement("button");b.className="t";b.setAttribute("aria-label","Square "+(i+1));
+    b.onclick=function(){
+      if(over||bd[i])return;bd[i]="h";
+      if(win("h")){over=true;W++;$("tm").textContent="You win! 🏳️‍🌈";draw();return}
+      if(bd.every(Boolean)){over=true;$("tm").textContent="It’s a draw!";draw();return}
+      draw();setTimeout(cpu,350);
+    };g.appendChild(b)})(i)}
+  draw();
+}
+$("tr").onclick=newT;newT();
+</script>
+</body>
+</html>
